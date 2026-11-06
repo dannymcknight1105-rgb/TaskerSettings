@@ -1,0 +1,5 @@
+build/
+.gradle/
+local.properties
+*.keystore
+# release/JarvisHUD.apk is committed with `git add -f` (the repo root ignores release/ and *.apk)

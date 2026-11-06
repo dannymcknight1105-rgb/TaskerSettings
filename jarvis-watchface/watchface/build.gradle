@@ -1,0 +1,24 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.jarvishud.watchface"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.jarvishud.watchface"
+        // Watch Face Format v2 needs Wear OS 5 (API 34) or newer
+        minSdk 34
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+    }
+}

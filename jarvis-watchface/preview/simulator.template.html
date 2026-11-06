@@ -1,0 +1,503 @@
+<title>J.A.R.V.I.S. HUD</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap">
+<style>
+/* The watch fonts ship inside the page so the preview uses the exact files in the APK. */
+__FONTS_CSS__
+
+/* Layout: a workshop bench. Live watch on the left, the telemetry console on the right,
+   field notes (legend + install) underneath. One committed dark HUD look. */
+:root {
+  --void: #03070a;
+  --bench: #071118;
+  --panel: #0a1820;
+  --line: #17323f;
+  --line-soft: #10252f;
+  --ink: #dcebf2;
+  --mute: #86a3b0;
+  --hud: #4fe3ff;
+  --hud-dim: #0e5a73;
+  --gold: #ffb23f;
+  --alert: #ff4d42;
+  --display: "Orbitron", "Eurostile", "Arial Black", sans-serif;
+  --body: "Rajdhani", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --data: "Share Tech Mono", "SFMono-Regular", Consolas, "Courier New", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--void); }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 700px at 22% 0%, color-mix(in srgb, var(--hud) 9%, transparent), transparent 70%),
+    var(--void);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 36px; }
+
+/* ---------- header */
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--data); font-size: 12px; letter-spacing: .16em; color: var(--hud); text-transform: uppercase; }
+h1 {
+  font-family: var(--display); font-weight: 700; margin: 0; line-height: 1.05;
+  font-size: clamp(30px, 5.4vw, 56px); letter-spacing: .06em; text-wrap: balance;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--hud) 45%, transparent);
+}
+.lede { margin: 0; color: var(--mute); max-width: 62ch; font-size: 18px; }
+
+/* ---------- bench */
+.bench { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 920px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+
+.stage {
+  position: relative; display: grid; gap: 18px; justify-items: center;
+  padding: 26px 12px 20px; border: 1px solid var(--line-soft); border-radius: 18px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 23px, color-mix(in srgb, var(--hud) 5%, transparent) 23px 24px),
+    repeating-linear-gradient(90deg, transparent 0 23px, color-mix(in srgb, var(--hud) 5%, transparent) 23px 24px),
+    var(--bench);
+}
+.stage-label { justify-self: start; font-family: var(--data); font-size: 12px; color: var(--mute); letter-spacing: .12em; padding-left: 8px; }
+
+/* device frames, drawn in CSS */
+.device { --d: min(62vw, 390px); position: relative; width: calc(var(--d) * 1.34); max-width: 100%; aspect-ratio: 1 / 1.62; display: grid; place-items: center; }
+.strap {
+  position: absolute; left: 50%; translate: -50% 0; width: calc(var(--d) * .62); height: 100%;
+  border-radius: 26px; background: linear-gradient(90deg, #0c0f12, #1b2126 18%, #121619 50%, #1b2126 82%, #0c0f12);
+  box-shadow: inset 0 0 0 1px #222a30;
+}
+.strap::before, .strap::after { content: ""; position: absolute; left: 12%; right: 12%; height: 2px; background: #252d33; }
+.strap::before { top: 9%; } .strap::after { bottom: 9%; }
+.case {
+  position: relative; width: calc(var(--d) * 1.18); aspect-ratio: 1; display: grid; place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(from 210deg, #4b545b, #c9d0d4, #5e676e, #aab2b7, #3d454b, #b9c1c6, #4b545b);
+  box-shadow: 0 30px 60px -20px #000, inset 0 0 0 2px #1a1f23;
+}
+.case::before { /* bezel guard */
+  content: ""; position: absolute; inset: 4.2%; border-radius: inherit;
+  background: conic-gradient(from 30deg, #23292d, #6f787e, #2a3034, #59626a, #23292d);
+  box-shadow: inset 0 0 0 1px #0b0d0f;
+}
+.btn { position: absolute; right: -2.2%; width: 4%; height: 11%; border-radius: 3px; background: linear-gradient(90deg, #6b747a, #c3cacd); box-shadow: 0 0 0 1px #1a1f23; }
+.btn.b1 { top: 26%; } .btn.b2 { top: 63%; } .btn.quick { display: none; top: 44.5%; height: 9%; background: linear-gradient(90deg, #b8501a, #ff8a3d); }
+.device.ultra .case { border-radius: 30%; background: conic-gradient(from 215deg, #545c62, #d4d9dc, #6a7278, #b3babe, #464e54, #c2c9cc, #545c62); }
+.device.ultra .case::before { inset: 3.2%; border-radius: 29%; background: conic-gradient(from 40deg, #1d2226, #59636a, #252b2f, #4b545b, #1d2226); }
+.device.ultra .btn.quick { display: block; }
+.device.ultra .btn.b1 { top: 22%; } .device.ultra .btn.b2 { top: 67%; }
+.glass {
+  position: relative; width: var(--d); aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+  background: #000; box-shadow: 0 0 0 calc(var(--d) * .028) #050607, 0 0 0 calc(var(--d) * .034) #2a3135;
+}
+.glass canvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
+.glass::after { /* sapphire glare */
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.08), transparent 38%, transparent 70%, rgba(255,255,255,.04));
+}
+.specs { font-family: var(--data); font-size: 12px; color: var(--mute); letter-spacing: .08em; text-align: center; }
+.toast {
+  min-height: 1.6em; font-family: var(--data); font-size: 13px; color: var(--hud); letter-spacing: .06em; text-align: center;
+}
+
+/* controls shared */
+.row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--void); }
+.seg button {
+  font: 600 14px/1 var(--body); letter-spacing: .06em; color: var(--mute); background: none; border: 0; padding: 8px 14px;
+  border-radius: 999px; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { color: var(--void); background: var(--hud); }
+.chip {
+  font: 600 14px/1 var(--body); letter-spacing: .05em; color: var(--ink); background: var(--panel); cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; display: inline-flex; gap: 8px; align-items: center;
+}
+.chip[aria-pressed="true"] { border-color: var(--hud); color: var(--hud); box-shadow: 0 0 0 1px var(--hud) inset; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--hud); outline-offset: 2px; }
+
+/* ---------- console */
+.console { display: grid; gap: 14px; }
+fieldset {
+  margin: 0; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--bench);
+  padding: 14px 16px 16px; display: grid; gap: 12px; min-width: 0;
+}
+legend { font-family: var(--data); font-size: 12px; letter-spacing: .18em; color: var(--hud); padding: 0 6px; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; }
+.swatch {
+  display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; text-align: left; cursor: pointer;
+  font: 600 14px/1.15 var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px;
+}
+.swatch[aria-pressed="true"] { border-color: var(--sw); box-shadow: 0 0 14px -4px var(--sw); }
+.dots { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 34px; height: 34px; border-radius: 50%; overflow: hidden; }
+.dots i:first-child { grid-row: span 2; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+@media (max-width: 480px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+label.field { display: grid; gap: 6px; font-size: 15px; font-weight: 600; color: var(--ink); min-width: 0; }
+label.field .val { font-family: var(--data); font-weight: 400; color: var(--hud); font-variant-numeric: tabular-nums; }
+label.field > span { display: flex; justify-content: space-between; gap: 8px; }
+select {
+  font: 600 15px var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%;
+}
+input[type="range"] { width: 100%; accent-color: var(--hud); }
+.switches { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- field notes */
+.notes { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; }
+@media (max-width: 920px) { .notes { grid-template-columns: minmax(0, 1fr); } }
+h2 { font-family: var(--display); font-weight: 500; font-size: 20px; letter-spacing: .1em; margin: 0 0 12px; color: var(--ink); }
+dl.legend { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 18px; }
+dl.legend dt { font-family: var(--data); font-size: 13px; color: var(--hud); letter-spacing: .1em; padding-top: 3px; }
+dl.legend dd { margin: 0; color: var(--ink); }
+dl.legend dd small { color: var(--mute); font-size: 15px; }
+@media (max-width: 480px) { dl.legend { grid-template-columns: minmax(0, 1fr); gap: 2px 0; } dl.legend dd { margin-bottom: 10px; } }
+ol.install { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; }
+ol.install li::marker { font-family: var(--data); color: var(--hud); }
+code, pre { font-family: var(--data); font-size: 14px; }
+pre { margin: 6px 0 0; padding: 10px 12px; background: var(--void); border: 1px solid var(--line-soft); border-radius: 8px; overflow-x: auto; color: var(--ink); }
+code { color: var(--hud); }
+.fine { color: var(--mute); font-size: 15px; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Wear OS 5+ · Watch Face Format v2 · Galaxy Watch5 Pro / Watch Ultra</div>
+    <h1>J.A.R.V.I.S. HUD</h1>
+    <p class="lede">This simulator runs the exact <code>watchface.xml</code> that ships in the APK. Feed it telemetry on the right, tilt it with your pointer, tap the HUD, and flip on always-on mode to see the standby screen.</p>
+  </header>
+
+  <section class="bench" aria-label="Simulator">
+    <div class="stage">
+      <div class="stage-label" id="stageLabel">GALAXY WATCH5 PRO · 45 MM · 450 × 450</div>
+      <div class="device" id="device">
+        <div class="strap" aria-hidden="true"></div>
+        <div class="case">
+          <span class="btn b1" aria-hidden="true"></span><span class="btn quick" aria-hidden="true"></span><span class="btn b2" aria-hidden="true"></span>
+          <div class="glass"><canvas id="face" width="900" height="900" aria-label="Live render of the J.A.R.V.I.S. HUD watch face"></canvas></div>
+        </div>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite">Tap the face: zones open apps, empty space replays the boot ping.</div>
+      <div class="row">
+        <div class="seg" role="group" aria-label="Watch model">
+          <button type="button" id="dev-pro" aria-pressed="true">Watch5 Pro</button>
+          <button type="button" id="dev-ultra" aria-pressed="false">Watch Ultra</button>
+        </div>
+      </div>
+      <div class="row">
+        <button type="button" class="chip" id="aod" aria-pressed="false">Always-on display</button>
+        <button type="button" class="chip" id="zones" aria-pressed="false">Show tap zones</button>
+        <button type="button" class="chip" id="boot">Replay boot ping</button>
+      </div>
+    </div>
+
+    <form class="console" id="console" autocomplete="off">
+      <fieldset>
+        <legend>SUIT</legend>
+        <div class="swatches" id="swatches"></div>
+      </fieldset>
+      <fieldset>
+        <legend>PROTOCOLS</legend>
+        <div class="grid2">
+          <label class="field"><span>Address me as</span><select id="honorific"></select></label>
+          <label class="field"><span>Second time zone</span><select id="zone"></select></label>
+        </div>
+        <div class="switches">
+          <button type="button" class="chip" id="hudMotion" aria-pressed="true">HUD animation</button>
+          <button type="button" class="chip" id="hexGrid" aria-pressed="true">Hex grid + radar</button>
+          <button type="button" class="chip" id="is24h" aria-pressed="false">24-hour clock</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>TELEMETRY</legend>
+        <div class="grid2">
+          <label class="field"><span>Battery <b class="val" id="v-battery"></b></span><input type="range" id="battery" min="0" max="100" value="78"></label>
+          <label class="field"><span>Heart rate <b class="val" id="v-heartRate"></b></span><input type="range" id="heartRate" min="0" max="200" value="72"></label>
+          <label class="field"><span>Steps <b class="val" id="v-steps"></b></span><input type="range" id="steps" min="0" max="20000" step="10" value="6240"></label>
+          <label class="field"><span>Step goal <b class="val" id="v-stepGoal"></b></span><input type="range" id="stepGoal" min="1000" max="20000" step="500" value="8000"></label>
+          <label class="field"><span>Core (battery) temp <b class="val" id="v-coreTemp"></b></span><input type="range" id="coreTemp" min="18" max="48" step="0.5" value="31.5"></label>
+          <label class="field"><span>Unread notifications <b class="val" id="v-notifications"></b></span><input type="range" id="notifications" min="0" max="30" value="3"></label>
+        </div>
+        <div class="switches"><button type="button" class="chip" id="charging" aria-pressed="false">Charging</button></div>
+      </fieldset>
+      <fieldset>
+        <legend>ATMOSPHERICS</legend>
+        <div class="switches">
+          <button type="button" class="chip" id="weather" aria-pressed="true">Weather data</button>
+          <button type="button" class="chip" id="fahrenheit" aria-pressed="false">Fahrenheit</button>
+        </div>
+        <div class="grid2">
+          <label class="field"><span>Condition</span><select id="condition"></select></label>
+          <label class="field"><span>Temperature <b class="val" id="v-temp"></b></span><input type="range" id="temp" min="-20" max="45" value="18"></label>
+          <label class="field"><span>High <b class="val" id="v-hi"></b></span><input type="range" id="hi" min="-20" max="48" value="22"></label>
+          <label class="field"><span>Low <b class="val" id="v-lo"></b></span><input type="range" id="lo" min="-25" max="40" value="12"></label>
+          <label class="field"><span>Precipitation <b class="val" id="v-precip"></b></span><input type="range" id="precip" min="0" max="100" value="30"></label>
+          <label class="field"><span>UV index <b class="val" id="v-uv"></b></span><input type="range" id="uv" min="0" max="11" value="3"></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>CLOCK</legend>
+        <div class="switches"><button type="button" class="chip" id="live" aria-pressed="true">Live time</button></div>
+        <label class="field"><span>Scrub time <b class="val" id="v-scrub"></b></span><input type="range" id="scrub" min="0" max="1439" value="608" disabled></label>
+      </fieldset>
+    </form>
+  </section>
+
+  <section class="notes">
+    <div>
+      <h2>WHAT'S ON THE FACE</h2>
+      <dl class="legend">
+        <dt>BEZEL</dt><dd>60 minute ticks, gold cardinal markers, a sweeping seconds trail with a comet head, and two analog chevrons: gold for the hour, theme color for the minute.</dd>
+        <dt>GAUGES</dt><dd>Four segmented arcs: <b>PWR</b> battery (turns red at 15%, breathes while charging), <b>♥ BPM</b> heart rate (the label pulses at your measured rate), <b>STEPS</b> toward your goal, and <b>CORE</b> battery temperature in °C or °F to match your weather unit.</dd>
+        <dt>CARDINALS</dt><dd>J.A.R.V.I.S tag at 12, week number at 3, live seconds at 6, unread messages at 9.</dd>
+        <dt>REACTOR</dt><dd>Counter-rotating dashed and segmented rings, ten coil notches, a radar sweep and a hex grid that shifts with wrist tilt.</dd>
+        <dt>CORE</dt><dd>Weather and condition, a greeting that changes through the day, a glowing clock that follows your 12/24-hour setting, the date, a telemetry ticker that cycles every 3 s (high/low, rain, UV, lunar phase, day and week, messages, step goal), and a status line that flags charging, critical power, high heart rate or a finished step goal.</dd>
+        <dt>PODS</dt><dd>Two customizable complication slots. They default to sunrise/sunset and your next event. <small>The simulator fills them with sample data.</small></dd>
+        <dt>SECOND ZONE</dt><dd>Zulu, Malibu, New York, London, Dubai, Tokyo or Sydney.</dd>
+        <dt>TAPS</dt><dd>Battery gauge → battery, heart gauge → heart rate, time → alarms, date → calendar, status → messages, core gauge → settings, J.A.R.V.I.S tag → music player.</dd>
+        <dt>WAKE</dt><dd>A sonar ping sweeps the face whenever it becomes visible, and again when you tap empty space.</dd>
+        <dt>STANDBY</dt><dd>Always-on mode drops to the time, date, chevrons, dim ticks and power level to save battery.</dd>
+      </dl>
+    </div>
+    <div>
+      <h2>INSTALL IT</h2>
+      <ol class="install">
+        <li>Get <code>JarvisHUD.apk</code> onto a computer. In the source it lives at <code>jarvis-watchface/release/</code>.</li>
+        <li>On the watch: Settings → About watch → Software → tap <b>Software version</b> 5 times. Then Settings → Developer options → turn on <b>ADB debugging</b> and <b>Wireless debugging</b>, and tap <b>Pair new device</b>.</li>
+        <li>From a computer on the same Wi-Fi:
+          <pre>adb pair &lt;ip&gt;:&lt;pairing-port&gt;
+adb connect &lt;ip&gt;:&lt;port&gt;
+adb install JarvisHUD.apk</pre>
+          No computer? Phone apps such as Bugjaeger can push the APK over the same wireless debugging link.</li>
+        <li>Long-press the current watch face, scroll to <b>J.A.R.V.I.S. HUD</b>, then tap <b>Customize</b> to pick the suit color, title, second time zone and the two pods.</li>
+      </ol>
+      <p class="fine" style="margin-top:14px">Needs One UI 6 Watch (Wear OS 5) or newer. Fan-made tribute, not affiliated with Marvel or Samsung. Fonts: Orbitron and Share Tech Mono, SIL Open Font License.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+/*__RENDERER__*/
+</script>
+<script>
+(() => {
+  'use strict';
+  const XML = __XML__;
+  const IMAGES = __IMAGES__;
+  const STRINGS = __STRINGS__;
+  const $ = (id) => document.getElementById(id);
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const images = {};
+  for (const [k, v] of Object.entries(IMAGES)) { const i = new Image(); i.src = v; images[k] = i; }
+  const wf = new WFF.WatchFace(XML, images);
+  const label = (ref) => (ref && ref.startsWith('@string/') ? STRINGS[ref.slice(8)] || ref : ref);
+
+  // sample complication icons, drawn once
+  function icon(draw) {
+    const c = document.createElement('canvas'); c.width = c.height = 48;
+    const x = c.getContext('2d'); x.strokeStyle = x.fillStyle = '#fff'; x.lineWidth = 4; x.lineCap = 'round';
+    draw(x); const im = new Image(); im.src = c.toDataURL(); return im;
+  }
+  const sunIcon = icon((x) => { x.beginPath(); x.arc(24, 30, 11, Math.PI, 0); x.stroke(); x.beginPath(); x.moveTo(6, 32); x.lineTo(42, 32); x.stroke();
+    [[24, 8, 24, 14], [8, 16, 12, 20], [40, 16, 36, 20]].forEach(([a, b, c, d]) => { x.beginPath(); x.moveTo(a, b); x.lineTo(c, d); x.stroke(); }); });
+  const calIcon = icon((x) => { x.strokeRect(8, 10, 32, 30); x.fillRect(8, 10, 32, 8); x.fillRect(15, 24, 6, 6); x.fillRect(27, 24, 6, 6); });
+
+  const CONDITIONS = ['Clear', 'Sunny', 'Partly cloudy', 'Cloudy', 'Fog', 'Light rain', 'Rain', 'Thunderstorm', 'Snow', 'Windy'];
+  const state = {
+    time: new Date(), ambient: false, is24h: false, tilt: { x: 0, y: 0 },
+    config: { themeColor: '0', honorific: '0', zone: '0', hudMotion: 'TRUE', hexGrid: 'TRUE' },
+    data: { battery: 78, charging: false, heartRate: 72, steps: 6240, stepGoal: 8000, coreTemp: 31.5, notifications: 3,
+      weather: true, temp: 18, unit: 1, condition: 'Partly cloudy', hi: 22, lo: 12, precip: 30, uv: 3 },
+    complications: {
+      0: { type: 'SHORT_TEXT', TEXT: '4:52', TITLE: 'Sunset', MONOCHROMATIC_IMAGE: sunIcon },
+      1: { type: 'SHORT_TEXT', TEXT: '3:30', TITLE: 'Meeting', MONOCHROMATIC_IMAGE: calIcon },
+    },
+    bootStart: null,
+  };
+  let live = true, scrubMin = 608, showZones = false, device = 'pro', lastTaps = [];
+
+  // ---- build config controls from the watch face's own UserConfigurations
+  const theme = wf.configs.themeColor;
+  const sw = $('swatches');
+  theme.options.forEach((o) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'swatch'; b.dataset.id = o.id;
+    const css = o.colors.map((c) => '#' + c.slice(3));
+    b.style.setProperty('--sw', css[0]);
+    b.innerHTML = `<span class="dots" aria-hidden="true"><i style="background:${css[0]}"></i><i style="background:${css[1]}"></i><i style="background:${css[2]}"></i></span><span></span>`;
+    b.lastChild.textContent = label(o.displayName);
+    b.setAttribute('aria-pressed', o.id === state.config.themeColor ? 'true' : 'false');
+    b.addEventListener('click', () => { state.config.themeColor = o.id; syncTheme(); });
+    sw.appendChild(b);
+  });
+  function syncTheme() {
+    const o = theme.options.find((x) => x.id === state.config.themeColor);
+    const css = o.colors.map((c) => '#' + c.slice(3));
+    document.documentElement.style.setProperty('--hud', css[0]);
+    document.documentElement.style.setProperty('--hud-dim', css[1]);
+    document.documentElement.style.setProperty('--gold', css[2]);
+    sw.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', b.dataset.id === o.id ? 'true' : 'false'));
+  }
+  for (const id of ['honorific', 'zone']) {
+    const sel = $(id);
+    wf.configs[id].options.forEach((o) => { const op = document.createElement('option'); op.value = o.id; op.textContent = label(o.displayName); sel.appendChild(op); });
+    sel.value = state.config[id];
+    sel.addEventListener('change', () => { state.config[id] = sel.value; });
+  }
+  const cond = $('condition');
+  CONDITIONS.forEach((c) => { const op = document.createElement('option'); op.textContent = c; cond.appendChild(op); });
+  cond.value = state.data.condition;
+  cond.addEventListener('change', () => { state.data.condition = cond.value; });
+
+  // ---- toggles
+  function toggle(id, get, set) {
+    const b = $(id);
+    b.setAttribute('aria-pressed', get() ? 'true' : 'false');
+    b.addEventListener('click', () => { set(!get()); b.setAttribute('aria-pressed', get() ? 'true' : 'false'); });
+  }
+  const cfgBool = (k) => [() => state.config[k] === 'TRUE', (v) => { state.config[k] = v ? 'TRUE' : 'FALSE'; }];
+  toggle('hudMotion', ...cfgBool('hudMotion'));
+  toggle('hexGrid', ...cfgBool('hexGrid'));
+  toggle('is24h', () => state.is24h, (v) => { state.is24h = v; });
+  toggle('charging', () => state.data.charging, (v) => { state.data.charging = v; });
+  toggle('weather', () => state.data.weather, (v) => { state.data.weather = v; });
+  toggle('fahrenheit', () => state.data.unit === 2, (v) => {
+    const f = (c) => Math.round(c * 9 / 5 + 32), c = (f2) => Math.round((f2 - 32) * 5 / 9);
+    state.data.unit = v ? 2 : 1;
+    for (const k of ['temp', 'hi', 'lo']) {
+      const el = $(k); const val = v ? f(+el.value) : c(+el.value);
+      el.min = v ? -4 : -25; el.max = v ? 118 : 48; el.value = val; state.data[k] = val;
+    }
+    paintValues();
+  });
+  toggle('aod', () => state.ambient, (v) => { state.ambient = v; if (!v) ping(); });
+  toggle('zones', () => showZones, (v) => { showZones = v; });
+  toggle('live', () => live, (v) => { live = v; $('scrub').disabled = v; paintValues(); });
+  $('boot').addEventListener('click', () => ping());
+
+  // ---- sliders
+  const units = { battery: '%', heartRate: ' bpm', coreTemp: ' °C', precip: '%' };
+  const sliders = ['battery', 'heartRate', 'steps', 'stepGoal', 'coreTemp', 'notifications', 'temp', 'hi', 'lo', 'precip', 'uv'];
+  function paintValues() {
+    for (const k of sliders) {
+      let v = state.data[k];
+      let text = (k === 'steps' || k === 'stepGoal') ? Number(v).toLocaleString('en-US') : String(v);
+      if (k === 'heartRate' && v === 0) text = 'no reading';
+      else if (k === 'temp' || k === 'hi' || k === 'lo') text += state.data.unit === 2 ? ' °F' : ' °C';
+      else text += units[k] || '';
+      $('v-' + k).textContent = text;
+    }
+    const h = Math.floor(scrubMin / 60), m = scrubMin % 60;
+    $('v-scrub').textContent = live ? 'live' : `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+  for (const k of sliders) {
+    const el = $(k);
+    el.value = state.data[k];
+    el.addEventListener('input', () => { state.data[k] = Number(el.value); paintValues(); });
+  }
+  $('scrub').addEventListener('input', (e) => { scrubMin = +e.target.value; paintValues(); });
+  $('console').addEventListener('submit', (e) => e.preventDefault());
+  paintValues();
+
+  // ---- device + canvas
+  const canvas = $('face');
+  const ctx = canvas.getContext('2d');
+  function setDevice(d) {
+    device = d;
+    $('device').classList.toggle('ultra', d === 'ultra');
+    $('dev-pro').setAttribute('aria-pressed', d === 'pro' ? 'true' : 'false');
+    $('dev-ultra').setAttribute('aria-pressed', d === 'ultra' ? 'true' : 'false');
+    $('stageLabel').textContent = d === 'ultra' ? 'GALAXY WATCH ULTRA · 47 MM · 480 × 480' : 'GALAXY WATCH5 PRO · 45 MM · 450 × 450';
+    sizeCanvas();
+  }
+  $('dev-pro').addEventListener('click', () => setDevice('pro'));
+  $('dev-ultra').addEventListener('click', () => setDevice('ultra'));
+  function sizeCanvas() {
+    const css = canvas.getBoundingClientRect().width || 360;
+    const px = Math.round(css * Math.min(3, window.devicePixelRatio || 1));
+    if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+  }
+  window.addEventListener('resize', sizeCanvas);
+
+  // pointer tilt -> accelerometer angles (parallax)
+  canvas.addEventListener('pointermove', (e) => {
+    const r = canvas.getBoundingClientRect();
+    state.tilt.x = ((e.clientX - r.left) / r.width - 0.5) * 120;
+    state.tilt.y = ((e.clientY - r.top) / r.height - 0.5) * 120;
+  });
+  canvas.addEventListener('pointerleave', () => { state.tilt.x = 0; state.tilt.y = 0; });
+
+  const TARGETS = {
+    BATTERY_STATUS: 'Opens battery status', HEALTH_HEART_RATE: 'Opens heart rate', MUSIC_PLAYER: 'Opens the music player',
+    ALARM: 'Opens alarms', CALENDAR: 'Opens the calendar', MESSAGE: 'Opens messages', SETTINGS: 'Opens settings',
+    'COMPLICATION 0': 'Left pod: opens its app, long-press the face to change it',
+    'COMPLICATION 1': 'Right pod: opens its app, long-press the face to change it',
+  };
+  function inside(pt, poly) {
+    let hit = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const a = poly[i], b = poly[j];
+      if ((a.y > pt.y) !== (b.y > pt.y) && pt.x < ((b.x - a.x) * (pt.y - a.y)) / (b.y - a.y) + a.x) hit = !hit;
+    }
+    return hit;
+  }
+  canvas.addEventListener('click', (e) => {
+    if (state.ambient) { state.ambient = false; $('aod').setAttribute('aria-pressed', 'false'); ping(); say('Waking up from always-on'); return; }
+    const r = canvas.getBoundingClientRect();
+    const pt = { x: ((e.clientX - r.left) / r.width) * canvas.width, y: ((e.clientY - r.top) / r.height) * canvas.height };
+    const hit = lastTaps.slice().reverse().find((t) => inside(pt, t.points));
+    if (hit) say(TARGETS[hit.target] || hit.target);
+    else { ping(); say('Rescanning: boot ping replayed'); }
+  });
+  let toastTimer;
+  function say(msg) { $('toast').textContent = msg; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').textContent = ' '; }, 2600); }
+  function ping() { if (!reduced) state.bootStart = performance.now(); }
+
+  function frame() {
+    const now = new Date();
+    if (live) state.time = now;
+    else { const t = new Date(now); t.setHours(Math.floor(scrubMin / 60), scrubMin % 60); state.time = t; }
+    state.animNow = performance.now();
+    const native = device === 'ultra' ? 480 : 450;
+    const s = canvas.width / native;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(s * native / wf.width, 0, 0, s * native / wf.width, 0, 0);
+    lastTaps = wf.render(ctx, state).taps;
+    if (showZones && !state.ambient) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.save();
+      ctx.setLineDash([6, 5]); ctx.lineWidth = Math.max(1, canvas.width / 450);
+      ctx.strokeStyle = '#ffffff'; ctx.fillStyle = 'rgba(255,255,255,.08)';
+      ctx.font = `${Math.round(canvas.width / 40)}px "Share Tech Mono", monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      for (const t of lastTaps) {
+        ctx.beginPath(); t.points.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        const cx = t.points.reduce((a, p) => a + p.x, 0) / 4, cy = t.points.reduce((a, p) => a + p.y, 0) / 4;
+        ctx.fillStyle = '#ffffff'; ctx.fillText(t.target.replace('COMPLICATION ', 'POD ').replace('HEALTH_', ''), cx, cy); ctx.fillStyle = 'rgba(255,255,255,.08)';
+      }
+      ctx.restore();
+    }
+  }
+  let last = 0;
+  function loop(t) {
+    const motion = state.config.hudMotion === 'TRUE' && !state.ambient && !reduced;
+    if (motion || t - last > 250) { frame(); last = t; }
+    requestAnimationFrame(loop);
+  }
+
+  window.__jarvis = { state, setDevice, frame, ping, setLive: (v) => { live = v; } };
+  const fontsReady = Promise.all(['700 20px Orbitron', '500 20px Orbitron', '20px "Share Tech Mono"'].map((f) => document.fonts.load(f).catch(() => null)));
+  Promise.all([fontsReady, ...Object.values(images).map((i) => i.decode().catch(() => null))]).then(() => {
+    syncTheme(); sizeCanvas(); ping(); requestAnimationFrame(loop);
+  });
+})();
+</script>

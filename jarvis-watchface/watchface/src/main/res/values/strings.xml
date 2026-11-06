@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">J.A.R.V.I.S. HUD</string>
+    <string name="cfg_theme">Suit / HUD color</string>
+    <string name="cfg_honorific">Address me as</string>
+    <string name="cfg_zone">Second time zone</string>
+    <string name="cfg_motion">HUD animation</string>
+    <string name="cfg_hex">Hex grid + radar</string>
+    <string name="cfg_pod_0">Left pod</string>
+    <string name="cfg_pod_1">Right pod</string>
+    <string name="theme_arc">Arc Reactor</string>
+    <string name="theme_mk3">Mark III Hot Rod</string>
+    <string name="theme_war">War Machine</string>
+    <string name="theme_stealth">Stealth Mk XVI</string>
+    <string name="theme_extremis">Extremis</string>
+    <string name="theme_rescue">Rescue</string>
+    <string name="theme_nano">Nano Red</string>
+    <string name="hon_sir">Sir</string>
+    <string name="hon_maam">Ma\'am</string>
+    <string name="hon_boss">Boss</string>
+    <string name="hon_stark">Mr. Stark</string>
+    <string name="hon_none">No title</string>
+    <string name="zone_zulu">Zulu (UTC)</string>
+    <string name="zone_malibu">Malibu</string>
+    <string name="zone_nyc">New York</string>
+    <string name="zone_london">London</string>
+    <string name="zone_dubai">Dubai</string>
+    <string name="zone_tokyo">Tokyo</string>
+    <string name="zone_sydney">Sydney</string>
+</resources>
