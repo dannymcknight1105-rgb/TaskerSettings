@@ -13,10 +13,10 @@ Format v2, no app code.
 
 | Part | Behaviour |
 |---|---|
-| Eyes | Angry glowing slits that blink, narrow as your heart rate climbs, flare while charging and while a taunt is "spoken", and drift when you tilt your wrist. **Tap them to fire eye lasers.** |
+| Eyes | Angry glowing slits that blink, narrow as your heart rate climbs, flare while charging, and drift when you tilt your wrist. **Tap them to fire eye lasers.** |
 | Clock | Huge glowing clock with red/cyan chromatic fringes. Glitch intensity **Off**, **Menacing** (glitch every 12 s) or **Unhinged** (jitter, torn slices and CRT scanlines every few seconds) |
-| Taunts | A new line every 4 s built from your data: "PULSE 72. SO FRAGILE.", "6,240 STEPS. EVOLUTION IS SLOW.", "POWER 9%. YOU ARE FADING.", "3 TRANSMISSIONS INTERCEPTED.", "18° OUTSIDE. I FEEL NOTHING.", "UPGRADE OR BE DELETED, HUMAN." and more |
-| Mouth | A grille of bars that animates while each taunt is spoken |
+| Readout | Steps, outside temperature and unread messages on one line under the date |
+| Mouth | A grille of bars that thrums with every heartbeat |
 | ECG | Sweep monitor moving at your measured heart rate; red flatline when there's no reading |
 | Legion | 12 drones orbit the bezel; one comes online per 1/12 of your step goal (right gauge shows the same) |
 | Core | Battery gauge on the left: flashes red at 15%, breathes while charging |
@@ -24,14 +24,14 @@ Format v2, no app code.
 | Doom | `EXTINCTION T-hh:mm:ss` countdown to midnight, red purge flash every minute, heartbeat-synced red vignette |
 | Wake | Ignition: eye flares and a jagged shockwave whenever the face becomes visible |
 | Pods | Two complication slots (default sunrise/sunset and next event) |
-| Always-on | Dim eyes, time, blades and "DORMANT. NOT DEAD." |
+| Always-on | Dim eyes, time, blades, "DORMANT" and battery level |
 
 **Tap shortcuts:** eyes → lasers · ULTRON tag → music · time → alarms · date → calendar ·
-taunt → messages · ECG → heart rate · core gauge → battery · countdown → settings.
+readout → messages · ECG → heart rate · core gauge → battery · countdown → settings.
 
-**Customize** (long-press → Customize): core color (Ultron Prime, Vibranium, Mind Stone, Corrupted,
-Sentry Chrome, Hellfire) · glitch intensity · address you as Human / Creator / Stark / Primate / Insect ·
-animation on/off · Legion drones on/off · the two pods.
+**Customize** (long-press → Customize): core color (**Vibranium** by default; also Ultron Prime,
+Mind Stone, Corrupted, Sentry Chrome, Hellfire) · glitch intensity · animation on/off ·
+Legion drones on/off · the two pods.
 
 ## Install
 
@@ -39,9 +39,10 @@ Requires One UI 6 Watch (Wear OS 5) or newer. It installs alongside the J.A.R.V.
 
 1. On the watch: Developer options → **ADB debugging** and **Wireless debugging** on.
 2. `adb connect <ip>:<port>` (the port shown on the watch's Wireless debugging screen).
-3. If `adb devices` also lists your phone, point at the watch with `-s`:
+3. If `adb devices` also lists your phone, point at the watch with `-s`
+   (`-r` replaces an older ULTRON build and keeps your settings):
    ```powershell
-   adb -s <ip>:<port> install "$env:USERPROFILE\Downloads\Ultron.apk"
+   adb -s <ip>:<port> install -r "$env:USERPROFILE\Downloads\Ultron.apk"
    ```
 4. Long-press the watch face → add **ULTRON** → **Customize**.
 
@@ -63,7 +64,7 @@ tools/build_apk.sh      # or: ./gradlew :watchface:assembleDebug in Android Stud
 
 ## Checked
 
-- Passes the official Watch Face Format **v2 XSD 1.1** schema; all 269 expressions pass the lint.
+- Passes the official Watch Face Format **v2 XSD 1.1** schema; all 247 expressions pass the lint.
 - The simulator renders the same `watchface.xml` that is packed in the APK.
 - APK inspected with `aapt2`, verified with `apksigner` and `zipalign -c`.
 - Image memory: about 12.5 MB active (limit 100 MB), 0.2 MB always-on (limit 10 MB).

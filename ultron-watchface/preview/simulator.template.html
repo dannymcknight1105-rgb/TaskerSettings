@@ -17,10 +17,10 @@ __FONTS_CSS__
   --line-soft: #241011;
   --ink: #f1e4e4;
   --mute: #b39191;
-  --core: #ff2b2b;
-  --core-dim: #4d0808;
+  --core: #a45cff;
+  --core-dim: #240a4a;
   --metal: #d0d7de;
-  --fringe: #00e5ff;
+  --fringe: #5cc8ff;
   --display: "Black Ops One", Impact, "Arial Black", sans-serif;
   --body: "Chakra Petch", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --data: "Share Tech Mono", "SFMono-Regular", Consolas, "Courier New", monospace;
@@ -187,9 +187,6 @@ code { color: var(--core); }
       <fieldset>
         <legend>BEHAVIOUR</legend>
         <div class="seg" role="group" aria-label="Glitch intensity" id="glitchSeg"></div>
-        <div class="grid2">
-          <label class="field"><span>Address you as</span><select id="honorific"></select></label>
-        </div>
         <div class="switches">
           <button type="button" class="chip" id="hudMotion" aria-pressed="true">Animation</button>
           <button type="button" class="chip" id="legion" aria-pressed="true">Legion drones</button>
@@ -224,9 +221,9 @@ code { color: var(--core); }
     <div>
       <h2>DOSSIER</h2>
       <dl class="legend">
-        <dt>EYES</dt><dd>Angry glowing slits. They blink, narrow as your heart rate climbs, flare while charging and while a taunt is "spoken", and drift with your wrist tilt. Tap them to fire eye lasers.</dd>
+        <dt>EYES</dt><dd>Angry glowing slits. They blink, narrow as your heart rate climbs, flare while charging, and drift with your wrist tilt. Tap them to fire eye lasers.</dd>
         <dt>CLOCK</dt><dd>A huge glowing clock with red and cyan chromatic fringes. Glitch intensity: <b>Off</b>, <b>Menacing</b> (a short glitch every 12 s) or <b>Unhinged</b> (jitter, torn slices and CRT scanlines every few seconds).</dd>
-        <dt>TAUNTS</dt><dd>A new line every 4 s built from your live data: pulse, steps, battery, messages, weather, day of year, Legion count, lunar phase. The mouth grille animates while each line is "spoken".</dd>
+        <dt>READOUT</dt><dd>Steps, outside temperature and unread messages on one line under the date. The mouth grille below it thrums with every heartbeat.</dd>
         <dt>ECG</dt><dd>A sweep monitor that moves at your measured heart rate, and flatlines in red when there's no reading.</dd>
         <dt>LEGION</dt><dd>12 drones orbit the bezel. One comes online for every twelfth of your step goal, and the right gauge tracks the same progress.</dd>
         <dt>CORE</dt><dd>Battery on the left gauge. It flashes red at 15% and breathes in metal colors while charging.</dd>
@@ -234,8 +231,8 @@ code { color: var(--core); }
         <dt>DOOM</dt><dd>EXTINCTION T-minus countdown to midnight, a red purge flash at the top of every minute, and a heartbeat-synced red vignette.</dd>
         <dt>WAKE</dt><dd>Ignition sequence: eye flares and a jagged shockwave every time the face becomes visible.</dd>
         <dt>PODS</dt><dd>Two complication slots, defaulting to sunrise/sunset and your next event. <small>The simulator fills them with sample data.</small></dd>
-        <dt>TAPS</dt><dd>Eyes → lasers, ULTRON tag → music, time → alarms, date → calendar, taunt → messages, ECG → heart rate, core gauge → battery, countdown → settings.</dd>
-        <dt>DORMANT</dt><dd>Always-on keeps the dim eyes, the time, the blades and "DORMANT. NOT DEAD."</dd>
+        <dt>TAPS</dt><dd>Eyes → lasers, ULTRON tag → music, time → alarms, date → calendar, readout → messages, ECG → heart rate, core gauge → battery, countdown → settings.</dd>
+        <dt>DORMANT</dt><dd>Always-on keeps the dim eyes, the time, the blades and the battery level.</dd>
       </dl>
     </div>
     <div>
@@ -245,7 +242,7 @@ code { color: var(--core); }
         <li>On the watch, turn on <b>ADB debugging</b> and <b>Wireless debugging</b> in Developer options, then connect with <code>adb connect &lt;ip&gt;:&lt;port&gt;</code>.</li>
         <li>If <code>adb devices</code> lists your phone too, name the watch with <code>-s</code>:
           <pre>adb -s &lt;ip&gt;:&lt;port&gt; install "$env:USERPROFILE\Downloads\Ultron.apk"</pre></li>
-        <li>Long-press the watch face, add <b>ULTRON</b>, then tap <b>Customize</b> for core color, glitch intensity, how it addresses you, the drones and the two pods.</li>
+        <li>Long-press the watch face, add <b>ULTRON</b>, then tap <b>Customize</b> for core color (Vibranium by default), glitch intensity, the drones and the two pods.</li>
       </ol>
       <p class="fine" style="margin-top:14px">Needs One UI 6 Watch (Wear OS 5) or newer. Fan-made tribute, not affiliated with Marvel or Samsung. Fonts: Oxanium, Black Ops One and Share Tech Mono, SIL Open Font License.</p>
     </div>
@@ -278,7 +275,7 @@ code { color: var(--core); }
 
   const state = {
     time: new Date(), ambient: false, is24h: false, tilt: { x: 0, y: 0 },
-    config: { themeColor: '0', glitch: '2', honorific: '0', hudMotion: 'TRUE', legion: 'TRUE' },
+    config: { themeColor: '1', glitch: '2', hudMotion: 'TRUE', legion: 'TRUE' },
     data: { battery: 78, charging: false, heartRate: 72, steps: 6240, stepGoal: 8000, coreTemp: 31, notifications: 3,
       weather: true, temp: 18, unit: 1, condition: 'Cloudy', hi: 22, lo: 12, precip: 30, uv: 3 },
     complications: {
@@ -318,10 +315,6 @@ code { color: var(--core); }
   });
   function syncGlitch() { gseg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.id === state.config.glitch ? 'true' : 'false')); }
   syncGlitch();
-  const hon = $('honorific');
-  wf.configs.honorific.options.forEach((o) => { const op = document.createElement('option'); op.value = o.id; op.textContent = label(o.displayName); hon.appendChild(op); });
-  hon.value = state.config.honorific;
-  hon.addEventListener('change', () => { state.config.honorific = hon.value; });
 
   function toggle(id, get, set) {
     const b = $(id);

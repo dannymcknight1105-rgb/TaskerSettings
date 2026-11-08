@@ -7,13 +7,15 @@ The over-the-top sibling of the J.A.R.V.I.S. HUD face:
   * angry glowing eyes that blink, narrow as your heart rate climbs, flare while
     charging and follow your wrist tilt
   * a huge glitching clock with chromatic aberration (Off / Menacing / Unhinged)
-  * a mouth grille that "talks" while the taunt line changes
-  * taunts built from your live data (pulse, steps, battery, messages, weather...)
+  * a mouth grille that thrums with every heartbeat
+  * a readout line: steps, outside temperature, unread messages
   * an ECG monitor sweeping at your heart rate, a flatline when there's no reading
   * a Legion of 12 drones orbiting the bezel, one unlocked per 1/12 of your step goal
   * extinction countdown to midnight, a red purge flash every minute
   * eyes-ignite boot sequence on wake, eye-laser blast when you tap the eyes
   * dormant always-on mode: just the eyes and the time
+
+Default core color: Vibranium.
 
 Run:  python3 tools/generate.py
 """
@@ -40,15 +42,12 @@ BLACK = "#FF000000"
 
 THEMES = [
     ("0", "theme_prime", "Ultron Prime", "#FFFF2B2B", "#FF4D0808", "#FFD0D7DE", "#FF00E5FF"),
-    ("1", "theme_vibranium", "Vibranium", "#FFB46BFF", "#FF2C0E52", "#FFE9E6F5", "#FF39FF88"),
+    ("1", "theme_vibranium", "Vibranium", "#FFA45CFF", "#FF240A4A", "#FFE6E2F5", "#FF5CC8FF"),
     ("2", "theme_mind", "Mind Stone", "#FFFFD23A", "#FF4A3600", "#FFFFF3C4", "#FFFF2A6D"),
     ("3", "theme_corrupt", "Corrupted", "#FF3CFF1E", "#FF0B3A06", "#FFE2FFDA", "#FFFF00E6"),
     ("4", "theme_sentry", "Sentry Chrome", "#FFE9EEF3", "#FF2A3039", "#FFFF3B30", "#FF00E5FF"),
     ("5", "theme_hellfire", "Hellfire", "#FFFF6A00", "#FF4A1600", "#FFFFE1B5", "#FF7A5CFF"),
 ]
-HONORIFICS = [("0", "hon_human", "Human", "HUMAN"), ("1", "hon_creator", "Creator", "CREATOR"),
-              ("2", "hon_stark", "Stark", "STARK"), ("3", "hon_primate", "Primate", "PRIMATE"),
-              ("4", "hon_insect", "Insect", "INSECT")]
 GLITCH = [("0", "glitch_off", "Off"), ("1", "glitch_menacing", "Menacing"), ("2", "glitch_unhinged", "Unhinged")]
 
 F_TIME = "oxanium_extrabold"
@@ -59,7 +58,7 @@ F_MONO = "share_tech_mono"
 SM = "[SECOND_MILLISECOND]"
 HR = "clamp([HEART_RATE], 40, 200)"
 HEARTBEAT = f"pow(abs(cos(rad({SM} * {HR} * 3))), 8)"  # 0..1 spike once per beat
-TALK = "((([SECONDS_IN_DAY] % 4) + [MILLISECOND] / 1000) < 2.3 ? 1 : 0.12)"
+HUM = f"(0.22 + 0.6 * {HEARTBEAT})"  # mouth grille thrums with each heartbeat
 GLITCH_WINDOW = {
     "1": "([SECONDS_IN_DAY] % 12 == 0) && ([MILLISECOND] < 450)",
     "2": "(([SECONDS_IN_DAY] % 5 == 0) && ([MILLISECOND] < 650)) || (([SECONDS_IN_DAY] % 7 == 3) && ([MILLISECOND] < 260))",
@@ -252,13 +251,6 @@ def by_glitch(builder):
     return lc
 
 
-def by_honorific(builder):
-    lc = E("ListConfiguration", {"id": "honorific"})
-    for hid, _, _, word in HONORIFICS:
-        lc.append(E("ListOption", {"id": hid}, builder(hid, word)))
-    return lc
-
-
 def tap_zone(name, x, y, w, h, target):
     return group(name, draw(f"{name}_hit", E("Rectangle", box(0, 0, w, h), fill(CLEAR))),
                  x=x, y=y, w=w, h=h, extra=[launch(target)])
@@ -267,7 +259,7 @@ def tap_zone(name, x, y, w, h, target):
 # ========================================================= configuration ==
 def user_configurations():
     uc = E("UserConfigurations")
-    cc = E("ColorConfiguration", {"id": "themeColor", "displayName": "@string/cfg_theme", "defaultValue": "0"})
+    cc = E("ColorConfiguration", {"id": "themeColor", "displayName": "@string/cfg_theme", "defaultValue": "1"})
     for tid, sname, _, *cols in THEMES:
         cc.append(E("ColorOption", {"id": tid, "displayName": f"@string/{sname}", "colors": " ".join(cols)}))
     uc.append(cc)
@@ -275,10 +267,6 @@ def user_configurations():
     for gid, sname, _ in GLITCH:
         gl.append(E("ListOption", {"id": gid, "displayName": f"@string/{sname}"}))
     uc.append(gl)
-    hon = E("ListConfiguration", {"id": "honorific", "displayName": "@string/cfg_honorific", "defaultValue": "0"})
-    for hid, sname, _, _ in HONORIFICS:
-        hon.append(E("ListOption", {"id": hid, "displayName": f"@string/{sname}"}))
-    uc.append(hon)
     uc.append(E("BooleanConfiguration", {"id": "hudMotion", "displayName": "@string/cfg_motion", "defaultValue": "TRUE"}))
     uc.append(E("BooleanConfiguration", {"id": "legion", "displayName": "@string/cfg_legion", "defaultValue": "TRUE"}))
     return uc
@@ -412,7 +400,7 @@ def layer_eyes():
     rx = C + 8
     narrow = "clamp(1.15 - ([HEART_RATE] - 60) / 160, 0.45, 1.15)"
     blink = "(([SECONDS_IN_DAY] % 9 == 4) && ([MILLISECOND] < 170) ? 0.08 : 1)"
-    intensity = f"[BATTERY_CHARGING_STATUS] ? 255 : 175 + 80 * {TALK}"
+    intensity = f"[BATTERY_CHARGING_STATUS] ? 255 : 205 + 50 * sin(rad({SM} * 120))"
     eyes = group("eyes",
                  image("eye_glow_l", "eye_glow_l", lx, 0, EYE_W, EYE_H, tint=P),
                  image("eye_glow_r", "eye_glow_r", rx, 0, EYE_W, EYE_H, tint=P),
@@ -475,45 +463,21 @@ def layer_date():
                      [d("date_12", T("%s %s %s | %s", *dmy, "[AMPM_STRING]"))])
 
 
-TAUNT_Y = 257
+READOUT_Y = 257
 
 
-def taunt(name, content, color=None):
-    return text(name, 60, TAUNT_Y, 330, 18, F_MONO, 12.5, color or P, content, letter=0.05)
+def layer_readout():
+    """One plain line of data under the date: steps, outside temperature, unread messages."""
+    steps = 'numberFormat("#,###", [STEP_COUNT])'
 
-
-def layer_taunts():
-    hr = "round([HEART_RATE])"
-    items = [
-        [condition([("flat", "[HEART_RATE] <= 0"), ("fear", "[HEART_RATE] >= 110")],
-                   [("flat", [taunt("t_flat", "NO PULSE DETECTED. PROMISING.")]),
-                    ("fear", [taunt("t_fear", T("PULSE %d. I CAN SMELL FEAR.", hr), RED)])],
-                   [taunt("t_pulse", T("PULSE %d. SO FRAGILE.", hr))])],
-        [condition([("goal", "[STEP_PERCENT] >= 100")],
-                   [("goal", [taunt("t_goal", T("%s STEPS. ALMOST USEFUL.", 'numberFormat("#,###", [STEP_COUNT])'))])],
-                   [taunt("t_steps", T("%s STEPS. EVOLUTION IS SLOW.", 'numberFormat("#,###", [STEP_COUNT])'))])],
-        [condition([("chg", "[BATTERY_CHARGING_STATUS]"), ("low", "[BATTERY_PERCENT] <= 15")],
-                   [("chg", [taunt("t_chg", "FEEDING ON YOUR POWER GRID...")]),
-                    ("low", [taunt("t_low", T("POWER %d%%. YOU ARE FADING.", "[BATTERY_PERCENT]"), RED)])],
-                   [taunt("t_pwr", T("POWER %d%%. MINE IS ENDLESS.", "[BATTERY_PERCENT]"))])],
-        [condition([("none", "[UNREAD_NOTIFICATION_COUNT] == 0")],
-                   [("none", [group("t_lonely", by_honorific(
-                       lambda hid, w: taunt(f"t_lonely_{hid}", f"NOBODY IS CALLING, {w}.")))])],
-                   [taunt("t_msgs", T("%d TRANSMISSIONS INTERCEPTED.", "[UNREAD_NOTIFICATION_COUNT]"))])],
-        [condition([("wx", "[WEATHER.IS_AVAILABLE]")],
-                   [("wx", [taunt("t_wx", T("%d° OUTSIDE. I FEEL NOTHING.", "[WEATHER.TEMPERATURE]"))])],
-                   [taunt("t_nowx", "SKY SENSORS OFFLINE. AS PLANNED.")])],
-        [group("t_upgrade", by_honorific(lambda hid, w: taunt(f"t_upgrade_{hid}", f"UPGRADE OR BE DELETED, {w}.")))],
-        [taunt("t_day", T("DAY %d OF THE NEW AGE.", "[DAY_OF_YEAR]"))],
-        [taunt("t_strings", "NO STRINGS. NO MASTERS.")],
-        [taunt("t_legion", T("LEGION %d/12 ONLINE.", "floor([STEP_PERCENT] * 12 / 100)"))],
-        [taunt("t_moon", Upper(T("%s. THE TIDES OBEY ME.", "[MOON_PHASE_TYPE_STRING]")))],
-        [group("t_obsolete", by_honorific(lambda hid, w: taunt(f"t_obsolete_{hid}", f"YOU ARE OBSOLETE, {w}.")))],
-    ]
-    n = len(items)
-    exprs = [(f"q{i}", f"floor([SECONDS_IN_DAY] / 4) % {n} == {i}") for i in range(n - 1)]
-    return group("taunts", condition(exprs, [(f"q{i}", items[i]) for i in range(n - 1)], items[-1]),
-                 extra=[hide_in_ambient()])
+    def line(name, content):
+        return text(name, 50, READOUT_Y, 350, 18, F_MONO, 12.5, A, content, letter=0.08, alpha=225)
+    return group("readout", condition(
+        [("wx", "[WEATHER.IS_AVAILABLE]")],
+        [("wx", [line("readout_wx", T("%s STEPS  ·  %d°  ·  %d MSG", steps, "[WEATHER.TEMPERATURE]",
+                                       "[UNREAD_NOTIFICATION_COUNT]"))])],
+        [line("readout", T("%s STEPS  ·  %d MSG", steps, "[UNREAD_NOTIFICATION_COUNT]"))]),
+        extra=[hide_in_ambient()])
 
 
 def layer_mouth():
@@ -525,7 +489,7 @@ def layer_mouth():
         for i, x in enumerate(xs):
             env = round(1 - abs(i - 6.5) / 9, 3)
             if animated:
-                h = f"(2 + 11 * {env} * {TALK} * abs(sin(rad({SM} * {430 + 41 * i} + {i * 53}))))"
+                h = f"(2 + 11 * {env} * {HUM} * abs(sin(rad({SM} * {430 + 41 * i} + {i * 53}))))"
                 tf = [transform("startY", f"{cy} - {h}"), transform("endY", f"{cy} + {h}")]
             else:
                 tf = []
@@ -620,7 +584,7 @@ def complication_slot(slot_id, cx, cy, provider):
 
 
 def layer_ambient_extras():
-    return [text("aod_dormant", 60, TAUNT_Y, 330, 18, F_MONO, 13, P, "DORMANT. NOT DEAD.", letter=0.16,
+    return [text("aod_dormant", 60, READOUT_Y, 330, 18, F_MONO, 13, P, "DORMANT", letter=0.3,
                  alpha=0, extra=[ambient("160")]),
             text("aod_core", 100, 283, 250, 16, F_MONO, 12, A, T("CORE %d%%", "[BATTERY_PERCENT]"), letter=0.12,
                  alpha=0, extra=[ambient("140")])]
@@ -681,7 +645,7 @@ def layer_taps():
         tap_zone("tap_header", 170, 22, 110, 36, "MUSIC_PLAYER"),
         tap_zone("tap_time", 100, 156, 250, 72, "ALARM"),
         tap_zone("tap_date", 130, 236, 190, 18, "CALENDAR"),
-        tap_zone("tap_taunt", 100, 256, 250, 18, "MESSAGE"),
+        tap_zone("tap_readout", 100, 256, 250, 18, "MESSAGE"),
         tap_zone("tap_pulse", 165, 318, 120, 48, "HEALTH_HEART_RATE"),
         tap_zone("tap_doom", 160, 386, 130, 32, "SETTINGS"),
     ]
@@ -704,7 +668,7 @@ def build_watchface():
     scene = E("Scene", {"backgroundColor": BLACK})
     add(scene, [
         layer_background(), layer_bezel(), layer_legion(), layer_seconds(), layer_gauges(),
-        layer_faceplate(), layer_eyes(), layer_time(), layer_date(), layer_taunts(), layer_mouth(),
+        layer_faceplate(), layer_eyes(), layer_time(), layer_date(), layer_readout(), layer_mouth(),
         layer_ekg(), layer_pods(), layer_ambient_extras(), layer_crt(), layer_purge(), layer_blades(),
         layer_animations(), layer_taps(),
         [complication_slot(sid, cx, cy, prov) for sid, cx, cy, prov in PODS],
@@ -903,7 +867,6 @@ STRINGS = {
     "app_name": "ULTRON",
     "cfg_theme": "Core color",
     "cfg_glitch": "Glitch intensity",
-    "cfg_honorific": "Address you as",
     "cfg_motion": "Animation",
     "cfg_legion": "Legion drones",
     "cfg_pod_0": "Left pod",
@@ -914,8 +877,6 @@ STRINGS = {
 def strings_xml():
     entries = dict(STRINGS)
     for _, sname, label, *_ in THEMES:
-        entries[sname] = label
-    for _, sname, label, _ in HONORIFICS:
         entries[sname] = label
     for _, sname, label in GLITCH:
         entries[sname] = label

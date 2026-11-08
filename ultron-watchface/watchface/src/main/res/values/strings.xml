@@ -3,7 +3,6 @@
     <string name="app_name">ULTRON</string>
     <string name="cfg_theme">Core color</string>
     <string name="cfg_glitch">Glitch intensity</string>
-    <string name="cfg_honorific">Address you as</string>
     <string name="cfg_motion">Animation</string>
     <string name="cfg_legion">Legion drones</string>
     <string name="cfg_pod_0">Left pod</string>
@@ -14,11 +13,6 @@
     <string name="theme_corrupt">Corrupted</string>
     <string name="theme_sentry">Sentry Chrome</string>
     <string name="theme_hellfire">Hellfire</string>
-    <string name="hon_human">Human</string>
-    <string name="hon_creator">Creator</string>
-    <string name="hon_stark">Stark</string>
-    <string name="hon_primate">Primate</string>
-    <string name="hon_insect">Insect</string>
     <string name="glitch_off">Off</string>
     <string name="glitch_menacing">Menacing</string>
     <string name="glitch_unhinged">Unhinged</string>
