@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cheesecake O'Clock exporter</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Jost:wght@400;500;600&family=Pinyon+Script&display=swap">
+<style>body{margin:0;background:#06100b}</style>
+</head>
+<body>
+<script src="face.js"></script>
+<script>
+  // Used by export.mjs: renders one theme to a PNG data URL at an exact pixel size.
+  window.renderPNG = function (theme, width, height, mode, iso) {
+    var canvas = document.createElement('canvas');
+    var face = CheesecakeFace.create(canvas, { theme: theme, mode: mode || 'wallpaper', width: width, height: height, pixelRatio: 1, motion: false });
+    face.render(iso ? new Date(iso) : new Date(), 0);
+    return canvas.toDataURL('image/png');
+  };
+  CheesecakeFace.ready().then(function () { window.__ready = true; });
+</script>
+</body>
+</html>
