@@ -1,0 +1,459 @@
+<title>ULTRON Watch Face</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap">
+<style>
+/* The watch fonts ship inside the page so the preview uses the exact files in the APK. */
+__FONTS_CSS__
+
+/* Layout: a containment bay. The live watch sits in a hazard-striped cell on the left,
+   the override console on the right, the dossier underneath. One committed dark look. */
+:root {
+  --void: #050203;
+  --cell: #0c0506;
+  --panel: #140809;
+  --line: #3a1416;
+  --line-soft: #241011;
+  --ink: #f1e4e4;
+  --mute: #b39191;
+  --core: #ff2b2b;
+  --core-dim: #4d0808;
+  --metal: #d0d7de;
+  --fringe: #00e5ff;
+  --display: "Black Ops One", Impact, "Arial Black", sans-serif;
+  --body: "Chakra Petch", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --data: "Share Tech Mono", "SFMono-Regular", Consolas, "Courier New", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--void); }
+body {
+  margin: 0;
+  background:
+    radial-gradient(900px 600px at 20% -10%, color-mix(in srgb, var(--core) 16%, transparent), transparent 70%),
+    var(--void);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 34px; }
+
+header { display: grid; gap: 8px; }
+.eyebrow { font-family: var(--data); font-size: 12px; letter-spacing: .18em; color: var(--core); text-transform: uppercase; }
+h1 {
+  font-family: var(--display); font-weight: 400; margin: 0; line-height: .95; letter-spacing: .14em;
+  font-size: clamp(44px, 9vw, 104px); color: var(--ink); text-wrap: balance;
+  text-shadow: -3px 0 color-mix(in srgb, var(--core) 85%, transparent), 3px 0 color-mix(in srgb, var(--fringe) 55%, transparent),
+    0 0 34px color-mix(in srgb, var(--core) 55%, transparent);
+}
+.lede { margin: 0; color: var(--mute); max-width: 64ch; font-size: 17px; }
+
+.bench { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 26px; align-items: start; }
+@media (max-width: 920px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+
+.stage {
+  position: relative; display: grid; gap: 16px; justify-items: center; overflow: hidden;
+  padding: 30px 12px 22px; border: 1px solid var(--line); border-radius: 6px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.35) 3px 4px),
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--core) 14%, transparent), transparent 62%),
+    var(--cell);
+}
+.stage::before, .stage::after { /* hazard stripes */
+  content: ""; position: absolute; left: 0; right: 0; height: 10px; opacity: .85;
+  background: repeating-linear-gradient(-45deg, var(--core) 0 12px, #000 12px 24px);
+}
+.stage::before { top: 0; } .stage::after { bottom: 0; }
+.stage-label { justify-self: start; font-family: var(--data); font-size: 12px; color: var(--mute); letter-spacing: .14em; padding-left: 8px; }
+
+.device { --d: min(62vw, 390px); position: relative; width: calc(var(--d) * 1.34); max-width: 100%; aspect-ratio: 1 / 1.62; display: grid; place-items: center; }
+.strap {
+  position: absolute; left: 50%; translate: -50% 0; width: calc(var(--d) * .62); height: 100%;
+  border-radius: 26px; background: linear-gradient(90deg, #0a0909, #1d1a1a 18%, #121010 50%, #1d1a1a 82%, #0a0909);
+  box-shadow: inset 0 0 0 1px #2a2424;
+}
+.strap::before, .strap::after { content: ""; position: absolute; left: 12%; right: 12%; height: 2px; background: #2b2525; }
+.strap::before { top: 9%; } .strap::after { bottom: 9%; }
+.case {
+  position: relative; width: calc(var(--d) * 1.18); aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%;
+  background: conic-gradient(from 210deg, #3b3536, #b9b2b2, #4e4647, #9b9494, #2f292a, #aaa3a3, #3b3536);
+  box-shadow: 0 30px 70px -20px #000, 0 0 60px -10px color-mix(in srgb, var(--core) 40%, transparent), inset 0 0 0 2px #171213;
+}
+.case::before {
+  content: ""; position: absolute; inset: 4.2%; border-radius: inherit;
+  background: conic-gradient(from 30deg, #1c1718, #5f5758, #231d1e, #4c4445, #1c1718);
+  box-shadow: inset 0 0 0 1px #0b0909;
+}
+.btn { position: absolute; right: -2.2%; width: 4%; height: 11%; border-radius: 3px; background: linear-gradient(90deg, #5d5657, #b8b1b1); box-shadow: 0 0 0 1px #171213; }
+.btn.b1 { top: 26%; } .btn.b2 { top: 63%; } .btn.quick { display: none; top: 44.5%; height: 9%; background: linear-gradient(90deg, #b8501a, #ff8a3d); }
+.device.ultra .case { border-radius: 30%; }
+.device.ultra .case::before { inset: 3.2%; border-radius: 29%; }
+.device.ultra .btn.quick { display: block; }
+.device.ultra .btn.b1 { top: 22%; } .device.ultra .btn.b2 { top: 67%; }
+.glass { position: relative; width: var(--d); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #000;
+  box-shadow: 0 0 0 calc(var(--d) * .028) #050404, 0 0 0 calc(var(--d) * .034) #2b2425; }
+.glass canvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
+.glass::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.07), transparent 38%, transparent 70%, rgba(255,255,255,.03)); }
+.toast { min-height: 1.6em; font-family: var(--data); font-size: 13px; color: var(--core); letter-spacing: .08em; text-align: center; }
+
+.row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; padding: 3px; background: var(--void); flex-wrap: wrap; }
+.seg button { font: 600 14px/1 var(--body); letter-spacing: .06em; color: var(--mute); background: none; border: 0; padding: 9px 14px; border-radius: 2px; cursor: pointer; text-transform: uppercase; }
+.seg button[aria-pressed="true"] { color: #000; background: var(--core); }
+.chip { font: 600 14px/1 var(--body); letter-spacing: .06em; color: var(--ink); background: var(--panel); cursor: pointer; text-transform: uppercase;
+  border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; display: inline-flex; gap: 8px; align-items: center; }
+.chip[aria-pressed="true"] { border-color: var(--core); color: var(--core); box-shadow: 0 0 0 1px var(--core) inset, 0 0 18px -6px var(--core); }
+.chip.fire { border-color: var(--core); color: #000; background: var(--core); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--fringe); outline-offset: 2px; }
+
+.console { display: grid; gap: 12px; }
+fieldset { margin: 0; border: 1px solid var(--line-soft); border-left: 3px solid var(--core); border-radius: 4px; background: var(--cell);
+  padding: 12px 16px 16px; display: grid; gap: 12px; min-width: 0; }
+legend { font-family: var(--data); font-size: 12px; letter-spacing: .2em; color: var(--core); padding: 0 6px; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; }
+.swatch { display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: center; text-align: left; cursor: pointer;
+  font: 600 14px/1.15 var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px; }
+.swatch[aria-pressed="true"] { border-color: var(--sw); box-shadow: 0 0 16px -4px var(--sw); }
+.dots { display: grid; grid-template-columns: 1fr 1fr; width: 32px; height: 32px; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+@media (max-width: 480px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+label.field { display: grid; gap: 6px; font-size: 15px; font-weight: 600; color: var(--ink); min-width: 0; }
+label.field > span { display: flex; justify-content: space-between; gap: 8px; }
+label.field .val { font-family: var(--data); font-weight: 400; color: var(--core); font-variant-numeric: tabular-nums; }
+select { font: 600 15px var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; width: 100%; }
+input[type="range"] { width: 100%; accent-color: var(--core); }
+.switches { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.notes { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; }
+@media (max-width: 920px) { .notes { grid-template-columns: minmax(0, 1fr); } }
+h2 { font-family: var(--display); font-weight: 400; font-size: 24px; letter-spacing: .14em; margin: 0 0 12px; color: var(--ink); }
+dl.legend { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 18px; }
+dl.legend dt { font-family: var(--data); font-size: 13px; color: var(--core); letter-spacing: .12em; padding-top: 3px; }
+dl.legend dd { margin: 0; }
+dl.legend dd small { color: var(--mute); font-size: 14px; }
+@media (max-width: 480px) { dl.legend { grid-template-columns: minmax(0, 1fr); gap: 2px 0; } dl.legend dd { margin-bottom: 10px; } }
+ol.install { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; }
+ol.install li { min-width: 0; overflow-wrap: anywhere; }
+ol.install li::marker { font-family: var(--data); color: var(--core); }
+code, pre { font-family: var(--data); font-size: 14px; }
+pre { margin: 6px 0 0; padding: 10px 12px; background: #000; border: 1px solid var(--line-soft); border-radius: 4px; overflow-x: auto; color: var(--ink); }
+code { color: var(--core); }
+.fine { color: var(--mute); font-size: 14px; margin: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Wear OS 5+ · Watch Face Format v2 · built for the Galaxy Watch5 Pro</div>
+    <h1>ULTRON</h1>
+    <p class="lede">The live face below runs the exact <code>watchface.xml</code> packed in the APK. Feed it your vitals, tilt it with your pointer so the eyes follow, tap the eyes to fire, and switch to always-on to watch it go dormant.</p>
+  </header>
+
+  <section class="bench" aria-label="Simulator">
+    <div class="stage">
+      <div class="stage-label" id="stageLabel">GALAXY WATCH5 PRO · 45 MM · 450 × 450</div>
+      <div class="device" id="device">
+        <div class="strap" aria-hidden="true"></div>
+        <div class="case">
+          <span class="btn b1" aria-hidden="true"></span><span class="btn quick" aria-hidden="true"></span><span class="btn b2" aria-hidden="true"></span>
+          <div class="glass"><canvas id="face" width="900" height="900" aria-label="Live render of the ULTRON watch face"></canvas></div>
+        </div>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite">Tap the eyes to fire. Other zones open apps.</div>
+      <div class="row">
+        <div class="seg" role="group" aria-label="Watch model">
+          <button type="button" id="dev-pro" aria-pressed="true">Watch5 Pro</button>
+          <button type="button" id="dev-ultra" aria-pressed="false">Watch Ultra</button>
+        </div>
+      </div>
+      <div class="row">
+        <button type="button" class="chip fire" id="fire">Fire eye lasers</button>
+        <button type="button" class="chip" id="boot">Replay ignition</button>
+        <button type="button" class="chip" id="aod" aria-pressed="false">Always-on</button>
+        <button type="button" class="chip" id="zones" aria-pressed="false">Tap zones</button>
+      </div>
+    </div>
+
+    <form class="console" id="console" autocomplete="off">
+      <fieldset>
+        <legend>CORE COLOR</legend>
+        <div class="swatches" id="swatches"></div>
+      </fieldset>
+      <fieldset>
+        <legend>BEHAVIOUR</legend>
+        <div class="seg" role="group" aria-label="Glitch intensity" id="glitchSeg"></div>
+        <div class="grid2">
+          <label class="field"><span>Address you as</span><select id="honorific"></select></label>
+        </div>
+        <div class="switches">
+          <button type="button" class="chip" id="hudMotion" aria-pressed="true">Animation</button>
+          <button type="button" class="chip" id="legion" aria-pressed="true">Legion drones</button>
+          <button type="button" class="chip" id="is24h" aria-pressed="false">24-hour clock</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>VITALS</legend>
+        <div class="grid2">
+          <label class="field"><span>Heart rate <b class="val" id="v-heartRate"></b></span><input type="range" id="heartRate" min="0" max="200" value="72"></label>
+          <label class="field"><span>Battery <b class="val" id="v-battery"></b></span><input type="range" id="battery" min="0" max="100" value="78"></label>
+          <label class="field"><span>Steps <b class="val" id="v-steps"></b></span><input type="range" id="steps" min="0" max="20000" step="10" value="6240"></label>
+          <label class="field"><span>Step goal <b class="val" id="v-stepGoal"></b></span><input type="range" id="stepGoal" min="1000" max="20000" step="500" value="8000"></label>
+          <label class="field"><span>Unread notifications <b class="val" id="v-notifications"></b></span><input type="range" id="notifications" min="0" max="30" value="3"></label>
+          <label class="field"><span>Outside temperature <b class="val" id="v-temp"></b></span><input type="range" id="temp" min="-20" max="45" value="18"></label>
+        </div>
+        <div class="switches">
+          <button type="button" class="chip" id="charging" aria-pressed="false">Charging</button>
+          <button type="button" class="chip" id="weather" aria-pressed="true">Weather data</button>
+          <button type="button" class="chip" id="fahrenheit" aria-pressed="false">Fahrenheit</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>CLOCK</legend>
+        <div class="switches"><button type="button" class="chip" id="live" aria-pressed="true">Live time</button></div>
+        <label class="field"><span>Scrub time <b class="val" id="v-scrub"></b></span><input type="range" id="scrub" min="0" max="1439" value="1421" disabled></label>
+      </fieldset>
+    </form>
+  </section>
+
+  <section class="notes">
+    <div>
+      <h2>DOSSIER</h2>
+      <dl class="legend">
+        <dt>EYES</dt><dd>Angry glowing slits. They blink, narrow as your heart rate climbs, flare while charging and while a taunt is "spoken", and drift with your wrist tilt. Tap them to fire eye lasers.</dd>
+        <dt>CLOCK</dt><dd>A huge glowing clock with red and cyan chromatic fringes. Glitch intensity: <b>Off</b>, <b>Menacing</b> (a short glitch every 12 s) or <b>Unhinged</b> (jitter, torn slices and CRT scanlines every few seconds).</dd>
+        <dt>TAUNTS</dt><dd>A new line every 4 s built from your live data: pulse, steps, battery, messages, weather, day of year, Legion count, lunar phase. The mouth grille animates while each line is "spoken".</dd>
+        <dt>ECG</dt><dd>A sweep monitor that moves at your measured heart rate, and flatlines in red when there's no reading.</dd>
+        <dt>LEGION</dt><dd>12 drones orbit the bezel. One comes online for every twelfth of your step goal, and the right gauge tracks the same progress.</dd>
+        <dt>CORE</dt><dd>Battery on the left gauge. It flashes red at 15% and breathes in metal colors while charging.</dd>
+        <dt>BEZEL</dt><dd>A spinning sawblade, a counter-rotating gear ring, a seconds spark, a steel hour blade and a red minute blade.</dd>
+        <dt>DOOM</dt><dd>EXTINCTION T-minus countdown to midnight, a red purge flash at the top of every minute, and a heartbeat-synced red vignette.</dd>
+        <dt>WAKE</dt><dd>Ignition sequence: eye flares and a jagged shockwave every time the face becomes visible.</dd>
+        <dt>PODS</dt><dd>Two complication slots, defaulting to sunrise/sunset and your next event. <small>The simulator fills them with sample data.</small></dd>
+        <dt>TAPS</dt><dd>Eyes → lasers, ULTRON tag → music, time → alarms, date → calendar, taunt → messages, ECG → heart rate, core gauge → battery, countdown → settings.</dd>
+        <dt>DORMANT</dt><dd>Always-on keeps the dim eyes, the time, the blades and "DORMANT. NOT DEAD."</dd>
+      </dl>
+    </div>
+    <div>
+      <h2>INSTALL</h2>
+      <ol class="install">
+        <li>Get <code>Ultron.apk</code> onto your computer. In the source it lives at <code>ultron-watchface/release/</code>.</li>
+        <li>On the watch, turn on <b>ADB debugging</b> and <b>Wireless debugging</b> in Developer options, then connect with <code>adb connect &lt;ip&gt;:&lt;port&gt;</code>.</li>
+        <li>If <code>adb devices</code> lists your phone too, name the watch with <code>-s</code>:
+          <pre>adb -s &lt;ip&gt;:&lt;port&gt; install "$env:USERPROFILE\Downloads\Ultron.apk"</pre></li>
+        <li>Long-press the watch face, add <b>ULTRON</b>, then tap <b>Customize</b> for core color, glitch intensity, how it addresses you, the drones and the two pods.</li>
+      </ol>
+      <p class="fine" style="margin-top:14px">Needs One UI 6 Watch (Wear OS 5) or newer. Fan-made tribute, not affiliated with Marvel or Samsung. Fonts: Oxanium, Black Ops One and Share Tech Mono, SIL Open Font License.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+/*__RENDERER__*/
+</script>
+<script>
+(() => {
+  'use strict';
+  const XML = __XML__;
+  const IMAGES = __IMAGES__;
+  const STRINGS = __STRINGS__;
+  const $ = (id) => document.getElementById(id);
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const images = {};
+  for (const [k, v] of Object.entries(IMAGES)) { const i = new Image(); i.src = v; images[k] = i; }
+  const wf = new WFF.WatchFace(XML, images);
+  const label = (ref) => (ref && ref.startsWith('@string/') ? STRINGS[ref.slice(8)] || ref : ref);
+
+  function icon(draw) {
+    const c = document.createElement('canvas'); c.width = c.height = 48;
+    const x = c.getContext('2d'); x.strokeStyle = x.fillStyle = '#fff'; x.lineWidth = 4; x.lineCap = 'round';
+    draw(x); const im = new Image(); im.src = c.toDataURL(); return im;
+  }
+  const sunIcon = icon((x) => { x.beginPath(); x.arc(24, 30, 11, Math.PI, 0); x.stroke(); x.beginPath(); x.moveTo(6, 32); x.lineTo(42, 32); x.stroke(); });
+  const calIcon = icon((x) => { x.strokeRect(8, 10, 32, 30); x.fillRect(8, 10, 32, 8); });
+
+  const state = {
+    time: new Date(), ambient: false, is24h: false, tilt: { x: 0, y: 0 },
+    config: { themeColor: '0', glitch: '2', honorific: '0', hudMotion: 'TRUE', legion: 'TRUE' },
+    data: { battery: 78, charging: false, heartRate: 72, steps: 6240, stepGoal: 8000, coreTemp: 31, notifications: 3,
+      weather: true, temp: 18, unit: 1, condition: 'Cloudy', hi: 22, lo: 12, precip: 30, uv: 3 },
+    complications: {
+      0: { type: 'SHORT_TEXT', TEXT: '4:52', TITLE: 'Sunset', MONOCHROMATIC_IMAGE: sunIcon },
+      1: { type: 'SHORT_TEXT', TEXT: '3:30', TITLE: 'Meeting', MONOCHROMATIC_IMAGE: calIcon },
+    },
+    bootStart: null, animStart: {},
+  };
+  let live = true, scrubMin = 1421, showZones = false, device = 'pro', lastTaps = [];
+
+  // ---- controls generated from the watch face's own UserConfigurations
+  const theme = wf.configs.themeColor;
+  const sw = $('swatches');
+  theme.options.forEach((o) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'swatch'; b.dataset.id = o.id;
+    const css = o.colors.map((c) => '#' + c.slice(3));
+    b.style.setProperty('--sw', css[0]);
+    b.innerHTML = `<span class="dots" aria-hidden="true"><i style="background:${css[0]}"></i><i style="background:${css[3] || css[2]}"></i><i style="background:${css[1]}"></i><i style="background:${css[2]}"></i></span><span></span>`;
+    b.lastChild.textContent = label(o.displayName);
+    b.addEventListener('click', () => { state.config.themeColor = o.id; syncTheme(); });
+    sw.appendChild(b);
+  });
+  function syncTheme() {
+    const o = theme.options.find((x) => x.id === state.config.themeColor);
+    const css = o.colors.map((c) => '#' + c.slice(3));
+    const r = document.documentElement.style;
+    r.setProperty('--core', css[0]); r.setProperty('--core-dim', css[1]); r.setProperty('--metal', css[2]); r.setProperty('--fringe', css[3]);
+    sw.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', b.dataset.id === o.id ? 'true' : 'false'));
+  }
+  const gseg = $('glitchSeg');
+  wf.configs.glitch.options.forEach((o) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = label(o.displayName); b.dataset.id = o.id;
+    b.addEventListener('click', () => { state.config.glitch = o.id; syncGlitch(); });
+    gseg.appendChild(b);
+  });
+  function syncGlitch() { gseg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.id === state.config.glitch ? 'true' : 'false')); }
+  syncGlitch();
+  const hon = $('honorific');
+  wf.configs.honorific.options.forEach((o) => { const op = document.createElement('option'); op.value = o.id; op.textContent = label(o.displayName); hon.appendChild(op); });
+  hon.value = state.config.honorific;
+  hon.addEventListener('change', () => { state.config.honorific = hon.value; });
+
+  function toggle(id, get, set) {
+    const b = $(id);
+    b.setAttribute('aria-pressed', get() ? 'true' : 'false');
+    b.addEventListener('click', () => { set(!get()); b.setAttribute('aria-pressed', get() ? 'true' : 'false'); });
+  }
+  const cfgBool = (k) => [() => state.config[k] === 'TRUE', (v) => { state.config[k] = v ? 'TRUE' : 'FALSE'; }];
+  toggle('hudMotion', ...cfgBool('hudMotion'));
+  toggle('legion', ...cfgBool('legion'));
+  toggle('is24h', () => state.is24h, (v) => { state.is24h = v; });
+  toggle('charging', () => state.data.charging, (v) => { state.data.charging = v; });
+  toggle('weather', () => state.data.weather, (v) => { state.data.weather = v; });
+  toggle('fahrenheit', () => state.data.unit === 2, (v) => {
+    const el = $('temp');
+    const val = v ? Math.round(+el.value * 9 / 5 + 32) : Math.round((+el.value - 32) * 5 / 9);
+    state.data.unit = v ? 2 : 1; el.min = v ? -4 : -20; el.max = v ? 113 : 45; el.value = val; state.data.temp = val; paintValues();
+  });
+  toggle('aod', () => state.ambient, (v) => { state.ambient = v; if (!v) ignite(); });
+  toggle('zones', () => showZones, (v) => { showZones = v; });
+  toggle('live', () => live, (v) => { live = v; $('scrub').disabled = v; paintValues(); });
+  $('boot').addEventListener('click', () => ignite());
+  $('fire').addEventListener('click', () => fire());
+
+  const sliders = ['heartRate', 'battery', 'steps', 'stepGoal', 'notifications', 'temp'];
+  function paintValues() {
+    const d = state.data;
+    $('v-heartRate').textContent = d.heartRate === 0 ? 'no reading' : d.heartRate + ' bpm';
+    $('v-battery').textContent = d.battery + '%';
+    $('v-steps').textContent = d.steps.toLocaleString('en-US');
+    $('v-stepGoal').textContent = d.stepGoal.toLocaleString('en-US');
+    $('v-notifications').textContent = d.notifications;
+    $('v-temp').textContent = d.temp + (d.unit === 2 ? ' °F' : ' °C');
+    const h = Math.floor(scrubMin / 60), m = scrubMin % 60;
+    $('v-scrub').textContent = live ? 'live' : `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+  for (const k of sliders) {
+    const el = $(k); el.value = state.data[k];
+    el.addEventListener('input', () => { state.data[k] = Number(el.value); paintValues(); });
+  }
+  $('scrub').addEventListener('input', (e) => { scrubMin = +e.target.value; paintValues(); });
+  $('console').addEventListener('submit', (e) => e.preventDefault());
+  paintValues();
+
+  const canvas = $('face');
+  const ctx = canvas.getContext('2d');
+  function setDevice(d) {
+    device = d;
+    $('device').classList.toggle('ultra', d === 'ultra');
+    $('dev-pro').setAttribute('aria-pressed', d === 'pro' ? 'true' : 'false');
+    $('dev-ultra').setAttribute('aria-pressed', d === 'ultra' ? 'true' : 'false');
+    $('stageLabel').textContent = d === 'ultra' ? 'GALAXY WATCH ULTRA · 47 MM · 480 × 480' : 'GALAXY WATCH5 PRO · 45 MM · 450 × 450';
+    sizeCanvas();
+  }
+  $('dev-pro').addEventListener('click', () => setDevice('pro'));
+  $('dev-ultra').addEventListener('click', () => setDevice('ultra'));
+  function sizeCanvas() {
+    const css = canvas.getBoundingClientRect().width || 360;
+    const px = Math.round(css * Math.min(3, window.devicePixelRatio || 1));
+    if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+  }
+  window.addEventListener('resize', sizeCanvas);
+  canvas.addEventListener('pointermove', (e) => {
+    const r = canvas.getBoundingClientRect();
+    state.tilt.x = ((e.clientX - r.left) / r.width - 0.5) * 120;
+    state.tilt.y = ((e.clientY - r.top) / r.height - 0.5) * 120;
+  });
+  canvas.addEventListener('pointerleave', () => { state.tilt.x = 0; state.tilt.y = 0; });
+
+  const TARGETS = {
+    BATTERY_STATUS: 'Opens battery status', HEALTH_HEART_RATE: 'Opens heart rate', MUSIC_PLAYER: 'Opens the music player',
+    ALARM: 'Opens alarms', CALENDAR: 'Opens the calendar', MESSAGE: 'Opens messages', SETTINGS: 'Opens settings',
+    'COMPLICATION 0': 'Left pod: opens its app. Long-press the face to change it',
+    'COMPLICATION 1': 'Right pod: opens its app. Long-press the face to change it',
+  };
+  function inside(pt, poly) {
+    let hit = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const a = poly[i], b = poly[j];
+      if ((a.y > pt.y) !== (b.y > pt.y) && pt.x < ((b.x - a.x) * (pt.y - a.y)) / (b.y - a.y) + a.x) hit = !hit;
+    }
+    return hit;
+  }
+  canvas.addEventListener('click', (e) => {
+    if (state.ambient) { state.ambient = false; $('aod').setAttribute('aria-pressed', 'false'); ignite(); say('Waking from dormancy'); return; }
+    const r = canvas.getBoundingClientRect();
+    const pt = { x: ((e.clientX - r.left) / r.width) * canvas.width, y: ((e.clientY - r.top) / r.height) * canvas.height };
+    const hit = lastTaps.slice().reverse().find((t) => inside(pt, t.points));
+    if (!hit) { say('Nothing there. Try the eyes.'); return; }
+    if (hit.target.startsWith('PLAY ')) { fire(); return; }
+    say(TARGETS[hit.target] || hit.target);
+  });
+  let toastTimer;
+  function say(msg) { $('toast').textContent = msg; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').textContent = ' '; }, 2600); }
+  function ignite() { if (!reduced) state.bootStart = performance.now(); }
+  function fire() { if (!reduced) state.animStart.eye_blast = performance.now(); say('Eye lasers fired'); }
+
+  function frame() {
+    const now = new Date();
+    if (live) state.time = now;
+    else { const t = new Date(now); t.setHours(Math.floor(scrubMin / 60), scrubMin % 60); state.time = t; }
+    state.animNow = performance.now();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(canvas.width / wf.width, 0, 0, canvas.width / wf.width, 0, 0);
+    lastTaps = wf.render(ctx, state).taps;
+    if (showZones && !state.ambient) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.save();
+      ctx.setLineDash([6, 5]); ctx.lineWidth = Math.max(1, canvas.width / 450);
+      ctx.strokeStyle = '#ffffff'; ctx.font = `${Math.round(canvas.width / 42)}px "Share Tech Mono", monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      for (const t of lastTaps) {
+        ctx.beginPath(); t.points.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath();
+        ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill(); ctx.stroke();
+        const cx = t.points.reduce((a, p) => a + p.x, 0) / 4, cy = t.points.reduce((a, p) => a + p.y, 0) / 4;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(t.target.replace('COMPLICATION ', 'POD ').replace('HEALTH_', '').replace('PLAY eye_blast', 'EYE LASERS'), cx, cy);
+      }
+      ctx.restore();
+    }
+  }
+  let last = 0;
+  function loop(t) {
+    const motion = state.config.hudMotion === 'TRUE' && !state.ambient && !reduced;
+    if (motion || t - last > 250) { frame(); last = t; }
+    requestAnimationFrame(loop);
+  }
+  window.__ultron = { state, setDevice, frame, ignite, fire, setLive: (v) => { live = v; } };
+  const fontsReady = Promise.all(['800 20px Oxanium', '600 20px Oxanium', '20px "Black Ops One"', '20px "Share Tech Mono"']
+    .map((f) => document.fonts.load(f).catch(() => null)));
+  Promise.all([fontsReady, ...Object.values(images).map((i) => i.decode().catch(() => null))]).then(() => {
+    syncTheme(); sizeCanvas(); ignite(); requestAnimationFrame(loop);
+  });
+})();
+</script>
